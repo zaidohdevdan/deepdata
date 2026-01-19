@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="UPI-4">
+
+    <title>Dashboard - UPI-4 ITAITINGA</title>
+    <style>
+        /* ===== FUNDO GERAL (mesmo do escalas) ===== */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at top, #dbeafe 0, #eff6ff 40%, #f9fafb 100%);
+  min-height: 100vh;
+  padding: 24px;
+  color: #0f172a;
+}
+
+/* Esconde telas via JS */
+.app-hidden {
+  display: none !important;
+}
+
+/* ===== TELA DE LOGIN ===== */
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 48px);
+}
+
+.login-container {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 24px 26px 18px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.10),
+    0 0 0 1px rgba(148, 163, 184, 0.25);
+}
+
+.login-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.login-header p {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.login-form {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-group label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.form-group input {
+  width: 94%;
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  transition: 0.18s ease;
+}
+
+.form-group input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.45);
+  background: #ffffff;
+}
+
+/* Botão Entrar com estilo pill */
+.btn-login {
+  margin-top: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+  transition: 0.18s ease;
+}
+
+.btn-login:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+}
+
+.login-error {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #ef4444;
+}
+
+/* Rodapé dentro do login */
+footer {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.footer-content small {
+  color: #718096;
+}
+
+.footer-content strong {
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* ===== DASHBOARD PRINCIPAL ===== */
+.dashboard-screen {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Cabeçalho do dashboard no mesmo estilo do escalas */
+.dashboard-header {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 22px 26px;
+  margin-bottom: 20px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.10),
+    0 0 0 1px rgba(148, 163, 184, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dashboard-title h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dashboard-title p {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.user-name span {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Botão Sair, reaproveitando estilo dos botões do escalas */
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #f97373;
+  color: #fef2f2;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+  transition: 0.18s ease;
+}
+
+.btn-logout:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+}
+
+/* ===== GRID DE MÓDULOS ===== */
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Cards de módulo como no escalas */
+.module-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 18px 18px 16px;
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(226, 232, 240, 0.95);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: 0.16s ease;
+}
+
+.module-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 48px rgba(15, 23, 42, 0.15),
+    0 0 0 1px rgba(148, 163, 184, 0.6);
+}
+
+.module-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.module-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.module-description {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Card de Escalas com leve destaque */
+.module-card.escalas {
+  background: linear-gradient(135deg, #e0f2fe 0%, #eff6ff 40%, #ffffff 100%);
+}
+
+/* Botão instalar PWA */
+.install-button {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #0ea5e9;
+  color: #f9fafb;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.30);
+  transition: 0.18s ease;
+}
+
+.install-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.38);
+}
+
+/* Base já existente */
+.module-card {
+  background: rgba(255, 255, 255, 0.82);     /* semi-transparente */
+  border-radius: 24px;
+  padding: 18px 18px 16px;
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.10),
+    0 0 0 1px rgba(226, 232, 240, 0.65);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: 0.16s ease;
+  backdrop-filter: blur(14px);               /* efeito vidro */
+  -webkit-backdrop-filter: blur(14px);       /* Safari */
+}
+
+
+.module-card .module-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+/* Alimentação – verde */
+.module-card.alimentacao {
+  background: linear-gradient(135deg,
+    rgba(220, 252, 231, 0.85),
+    rgba(236, 253, 245, 0.85),
+    rgba(255, 255, 255, 0.9)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.module-card.alimentacao .module-icon {
+  background: #bbf7d0;
+  color: #166534;
+}
+
+/* Café – marrom/quente */
+.module-card.cafe {
+  background: linear-gradient(135deg,
+    rgba(220, 252, 231, 0.85),
+    rgba(236, 253, 245, 0.85),
+    rgba(255, 255, 255, 0.9)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.module-card.cafe .module-icon {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+/* Biscoitos – amarelo suave */
+.module-card.biscoito {
+  background: linear-gradient(135deg,
+    rgba(220, 252, 231, 0.85),
+    rgba(236, 253, 245, 0.85),
+    rgba(255, 255, 255, 0.9)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.module-card.biscoito .module-icon {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Ocorrências – laranja/aviso */
+.module-card.ocorrencias {
+ background: linear-gradient(135deg,
+    rgba(220, 252, 231, 0.85),
+    rgba(236, 253, 245, 0.85),
+    rgba(255, 255, 255, 0.9)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.module-card.ocorrencias .module-icon {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+/* Visita Social – roxo suave */
+.module-card.sistema {
+  background: linear-gradient(135deg,
+    rgba(220, 252, 231, 0.85),
+    rgba(236, 253, 245, 0.85),
+    rgba(255, 255, 255, 0.9)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.module-card.sistema .module-icon {
+  background: #ddd6fe;
+  color: #5b21b6;
+}
+
+/* Escalas – azul (já destacado) */
+.module-card.escalas {
+ background: linear-gradient(135deg,
+    rgba(220, 252, 231, 0.85),
+    rgba(236, 253, 245, 0.85),
+    rgba(255, 255, 255, 0.9)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.module-card.escalas .module-icon {
+  background: #bfdbfe;
+  color: #1d4ed8;
+}
+
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 1024px) {
+  body {
+    padding: 16px;
+  }
+
+  .modules-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 12px 10px;
+  }
+
+  .login-container {
+    border-radius: 22px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px 16px;
+  }
+
+  .dashboard-title h1 {
+    font-size: 20px;
+  }
+
+  .modules-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .install-button {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px 8px;
+  }
+
+  .login-container,
+  .dashboard-header,
+  .module-card {
+    border-radius: 20px;
+  }
+}
+
+
+
+    </style>
+</head>
+<script>
+  // Registra o Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registrado com sucesso:', registration.scope);
+        })
+        .catch(error => {
+          console.log('Falha ao registrar Service Worker:', error);
+        });
+    });
+  }
+</script>
+
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🔒 DeepData</h1>
+                <p>Administrativo - Acesso Restrito</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        placeholder="Digite seu usuário" 
+                        required
+                        autocomplete="username"
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        placeholder="Digite sua senha" 
+                        required
+                        autocomplete="current-password"
+                    />
+                </div>
+                <button type="submit" class="btn-login">Entrar</button>
+                <p class="login-error" id="loginError"></p>
+            </form>
+<footer>
+    <div class="footer-content">
+      
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;"><center>
+            <small style="color: #718096;">
+                Sistema desenvolvido por 
+                <strong style="color: #667eea; font-weight: 600;">Zaidoh</strong>
+            </small></center>
+        </div>
+    </div>
+</footer>
+        </div>
+
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="dashboardScreen" class="dashboard-screen app-hidden">
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <h1>🏢 Dashboard UPI-4</h1>
+                <p>ITAITINGA 4 - Sistema de Gestão</p>
+            </div>
+            <div class="user-info">
+                <div class="user-name">👤 Bem-vindo, <span id="userName"></span></div>
+                <button id="btnLogout" class="btn-logout">🚪 Sair</button>
+            </div>
+        </div>
+
+        <div class="modules-grid">
+            <!-- Módulo de Alimentação -->
+            <a href="alimentacao.html" class="module-card alimentacao">
+                <div class="module-icon">🍽️</div>
+                <div class="module-title">Controle de Alimentação</div>
+                <div class="module-description">
+                    Gerencie a distribuição de quentinhas e caixas por ala. 
+                    Calcule automaticamente as necessidades de alimentação dos internos.
+                </div>
+            </a>
+
+<!-- Módulo de Café - NOVO -->
+    <a href="cafe.html" class="module-card cafe">
+        <div class="module-icon">☕</div>
+        <div class="module-title">Controle de Café</div>
+        <div class="module-description">
+            Gerencie a distribuição de pães e café por ala. 
+            Calcule pacotes de pães (80un) e garrafas de café (40L).
+        </div>
+    </a>
+
+ <!-- Módulo de Biscoitos - NOVO -->
+    <a href="biscoito.html" class="module-card biscoito">
+        <div class="module-icon">🍪</div>
+        <div class="module-title">Controle de Biscoitos</div>
+        <div class="module-description">
+            Gerencie a distribuição de biscoitos por ala. Calcule pacotes (72un), unidades e garrafas (40L). Cada interno recebe 8 biscoitos.
+        </div>
+    </a>
+
+<!-- Módulo de Ocorrências - NOVO -->
+<a href="ocorrencias.html" class="module-card ocorrencias">
+    <div class="module-icon">📝</div>
+    <div class="module-title">Registro de Ocorrências</div>
+    <div class="module-description">
+        Registre e gerencie ocorrências diárias. Controle eventos, incidentes e observações importantes do plantão.
+    </div>
+</a>
+
+            <!-- Módulo de Sistema de Retirada -->
+            <a href="sistema.html" class="module-card sistema">
+                <div class="module-icon">📋</div>
+                <div class="module-title">Visita Social</div>
+                <div class="module-description">
+                    Controle de retirada de internos para visitas. 
+                    Gerencie senhas, localizações e distribuição por blocos e alas.
+                </div>
+            </a>
+
+
+	    <!-- Módulo de Sistema de Escalas-->
+            <a href="escalas.html" class="module-card escalas">
+                <div class="module-icon">📋</div>
+                <div class="module-title">ESCALAS</div>
+                <div class="module-description">
+                    ⚙️ Em construção ...
+                </div>
+            </a>	
+
+        </div>
+    </div>
+
+<!-- Botão de Instalação PWA -->
+<button id="installButton" class="install-button">
+    📱 Instalar App
+</button>
+
+    <script>
+        // ============================================
+        // SISTEMA DE AUTENTICAÇÃO CENTRALIZADO
+        // ============================================
+        
+        const USUARIOS = {
+            'admin': 'admin#216216',
+            'upi4': 'seguranca#216216',
+            'almeida': 'almeida#216216'
+        };
+
+        // Verificar se está logado
+        function verificarLogin() {
+            const logado = sessionStorage.getItem('usuarioLogado');
+            const loginScreen = document.getElementById('loginScreen');
+            const dashboardScreen = document.getElementById('dashboardScreen');
+            const userName = document.getElementById('userName');
+            
+            if (logado) {
+                loginScreen.style.display = 'none';
+                dashboardScreen.classList.remove('app-hidden');
+                dashboardScreen.style.display = 'block';
+                userName.textContent = logado;
+            } else {
+                loginScreen.style.display = 'flex';
+                dashboardScreen.classList.add('app-hidden');
+            }
+        }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('loginError');
+            
+            if (USUARIOS[username] && USUARIOS[username] === password) {
+                sessionStorage.setItem('usuarioLogado', username);
+                errorMsg.textContent = '';
+                verificarLogin();
+            } else {
+                errorMsg.textContent = '❌ Usuário ou senha incorretos!';
+                document.getElementById('password').value = '';
+            }
+        });
+
+        // Logout
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            if (confirm('Deseja realmente sair do sistema?')) {
+                sessionStorage.removeItem('usuarioLogado');
+                verificarLogin();
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+            }
+        });
+
+        // Verificar login ao carregar página
+        verificarLogin();
+    </script>
+
+
+</body>
+</html>

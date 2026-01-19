@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="UPI-4">
+
+    <title>Ocorrências - UPI-4 Itaitinga</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            color: #2d3748;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            color: #718096;
+            font-size: 1em;
+        }
+
+        .btn-voltar {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-voltar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.4);
+        }
+
+        .content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .categoria {
+            margin-bottom: 40px;
+        }
+
+        .categoria-header {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .categoria-header h2 {
+            font-size: 1.5em;
+        }
+
+        .cards-grid {
+    	    display: grid;
+    	    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+   	    gap: 15px;
+	}
+
+	.card-template {
+    	    background: white;
+            border: 2px solid #e2e8f0;
+   	    border-radius: 8px;
+    	    padding: 15px;
+    	    cursor: pointer;
+    	    transition: all 0.3s;
+    	    position: relative;
+    	    text-align: center;
+	}
+
+	.card-template:hover {
+    	    transform: translateY(-3px);
+    	    box-shadow: 0 8px 20px rgba(237, 137, 54, 0.3);
+    	    border-color: #ed8936;
+	}
+
+	.card-template:active {
+            transform: translateY(-1px);
+	}
+
+	.card-icon {
+    	    font-size: 2.5em;
+    	    margin-bottom: 8px;
+	}
+
+	.card-title {
+    	    color: #2d3748;
+    	    font-size: 0.85em;
+    	    font-weight: 600;
+    	    margin-bottom: 5px;
+    	    line-height: 1.2;
+	}
+
+	.card-description {
+    	    color: #718096;
+   	    font-size: 0.7em;
+    	    line-height: 1.3;
+    	    display: none; /* Oculta descrição para economizar espaço */
+	}
+
+	.copy-icon {
+    	    position: absolute;
+   	    top: 8px;
+   	    right: 8px;
+   	    color: #cbd5e0;
+    	    font-size: 0.9em;
+	}
+
+	/* Mostra descrição ao passar o mouse */
+	.card-template:hover .card-description {
+    	    display: block;
+	}
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.show {
+            display: flex;
+        }
+
+        .notification-icon {
+            font-size: 1.5em;
+        }
+
+        .notification-text {
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .cards-grid {
+        	grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        	gap: 10px;
+    	    }
+
+    	    .card-template {
+       		padding: 12px;
+   	     }
+
+    	    .card-icon {
+        	font-size: 2em;
+   	    }
+
+    	    .card-title {
+        	font-size: 0.75em;
+    	    }
+
+            .notification {
+                right: 10px;
+                left: 10px;
+                padding: 15px;
+            }
+        }
+     	@media (max-width: 480px) {
+   	   .cards-grid {
+        	grid-template-columns: repeat(2, 1fr);
+        	gap: 10px;
+    	   }
+	}
+
+    </style>
+</head>
+<script>
+  // Registra o Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registrado com sucesso:', registration.scope);
+        })
+        .catch(error => {
+          console.log('Falha ao registrar Service Worker:', error);
+        });
+    });
+  }
+</script>
+
+<body>
+    <!-- Notificação de Sucesso -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">✅</div>
+        <div class="notification-text">Conteúdo copiado!</div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <h1>📝Ocorrências</h1>
+                <p>UPI-4 Itaitinga - Clique no card para copiar o texto</p>
+            </div>
+            <a href="index.html" class="btn-voltar">← Voltar ao Dashboard</a>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="content">
+            
+            <!-- CATEGORIA: SAÚDE -->
+            <div class="categoria">
+                <div class="categoria-header" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+                    <span style="font-size: 2em;">🏥</span>
+                    <h2>ATENDIMENTOS DIVERSOS</h2>
+                </div>
+                <div class="cards-grid">
+                    <div class="card-template" onclick="copiarTexto(this)">
+                        <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento Médico no setor de saúde desta unidade, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+                        <div class="copy-icon">📋</div>
+                        <div class="card-icon">👨‍⚕️</div>
+                        <div class="card-title">ATEND. MÉDICO</div>           
+                    </div>
+
+                    <div class="card-template" onclick="copiarTexto(this)">
+                        <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento Odontológico no setor de saúde desta unidade, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+                        <div class="copy-icon">📋</div>
+                        <div class="card-icon">🦷</div>
+                        <div class="card-title">ATEND. ODONTO</div>     
+                    </div>
+
+                    <div class="card-template" onclick="copiarTexto(this)">
+                        <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento Psiquiátrico no setor de saúde desta unidade, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+                        <div class="copy-icon">📋</div>
+                        <div class="card-icon">🤪</div>
+                        <div class="card-title">ATEND. PSIQUIÁTRICO</div>           
+                    </div>
+		    
+                    <div class="card-template" onclick="copiarTexto(this)">
+                        <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento Fisioterapeuta no setor de saúde desta unidade, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+                        <div class="copy-icon">📋</div>
+                        <div class="card-icon">🦽</div>
+                        <div class="card-title">ATEND. FISIO</div>           
+                    </div>
+
+                    <div class="card-template" onclick="copiarTexto(this)">
+                        <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento com Assistente Social no setor de saúde desta unidade, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+                        <div class="copy-icon">📋</div>
+                        <div class="card-icon">💁</div>
+                        <div class="card-title">ATEND. SOCIAL</div>           
+                    </div>			       	   
+
+		  <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento Psicológico no setor de saúde desta unidade, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">🧠</div>
+            		<div class="card-title">ATEND. PSICOLÓGICO</div>
+    		  </div>
+
+		  <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento de enfermaria no setor de saúde desta unidade, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">💉</div>
+            		<div class="card-title">ATEND. ENFERMAGEM</div>
+    		  </div>
+
+		  <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, os internos da ala ABCDEF foram submetidos a uma triagem no interior da referida ala. A equipe de triagem composta pela enfermeira XXXXXX, acompanhada dos demais profissionais de saúde, conforme programação previamente estabelecida, realizaram a triagem para agendamentos de atendimentos médicos, odontológicos, entre outros. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">🔎</div>
+            		<div class="card-title">TRIAGEM</div>
+    		  </div>
+
+		  <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, das 08h00 às 17h00, ocorrerão os atendimentos de natureza jurídica por videoconferência com os internos relacionados na seção “CUSTODIADOS” desta ocorrência, setor de SALAS DE VIDEOCONFERÊNCIA. Todo o procedimento foi supervisionado pelo(a) Policial Penal discriminado(a) na seção “SERVIDORES” e transcorreu sem alterações. </textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">📹</div>
+            		<div class="card-title">ATEND. VIDEOCONF</div>
+    		  </div> 
+				
+		  <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, no período da manhã/tarde, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento com o defensor público no auditório da videira, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">👨‍💼</div>
+            		<div class="card-title">ATEND. ADV. CASA</div>
+    		  </div>
+		
+	          <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a Vossa Senhoria que, nos períodos da manhã e tarde, foram realizados os atendimentos jurídicos conforme a programação estabelecida. Os detalhes da operação constam no protocolo SIGEPEN nº 016012026.83086.349.1, que contém a relação nominal de internos e advogados. A consulta detalhada pode ser realizada através do Sistema SIGEPEN, na aba Relatório Agendamento Jurídico.  Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">👨‍💼</div>
+            		<div class="card-title">ATEND. ADV</div>
+    		  </div>    
+	
+                  <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, no período da manhã/tarde, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento com o defensor público no auditório da videira, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">👨‍⚖️</div>
+            		<div class="card-title">ATEND. DEF. PUB</div>
+    		  </div>
+
+		  <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, no período da manhã/tarde, os internos relacionados na seção "CUSTODIADOS" desta ocorrência foram conduzidos de suas respectivas celas para atendimento com o oficial de justiça, Dr XXXXXX, nas salas de esperas desta unidade, conforme programação previamente estabelecida. Todo o procedimento foi supervisionado pelo Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">⚖️</div>
+            		<div class="card-title">ATEND. OF. JUSTIÇA</div>
+    		  </div>
+		
+		  <div class="card-template" onclick="copiarTexto(this)">
+            		<textarea style="display:none;">Comunico a vossa senhoria que, nesta presente data, no turno da manhã/tarde, durante a chamada dos internos para atendimento ________, os internos listados na seção "CUSTODIADOS" recusaram o referido atendimento e assinaram os seus respectivos termos de recusa, conforme consta em anexo. Todo o procedimento foi supervisionado pelo(a) Policial Penal discriminado(a) na seção “SERVIDORES” e transcorreu sem outras alterações.</textarea>
+            		<div class="copy-icon">📋</div>
+            		<div class="card-icon">🖋️</div>
+            		<div class="card-title">TERMO DE RECUSA</div>
+    		  </div>
+
+              </div>
+         </div>
+
+
+<!-- CATEGORIA: ROTINAS PRISIONAIS -->
+<div class="categoria">
+     <div class="categoria-header" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+	<span style="font-size: 2em;">👮</span>
+	<h2>ROTINAS PRISIONAIS</h2>
+    </div>
+    <div class="cards-grid">
+	<div class="card-template" onclick="copiarTexto(this)">
+	     <textarea style="display:none;">Comunico a Vossa Senhoria que, no período da manhã, por volta das 07h30 às 09:30, foi realizado o banho de sol dos internos da Ala X, sob a vigilância aproximada dos Policiais Penais discriminados na seção “SERVIDORES” desta ocorrência. Foi realizada a vistoria estrutural em todas as celas. </textarea>
+	     <div class="copy-icon">📋</div>
+	     <div class="card-icon">☀️</div>
+	     <div class="card-title">BANHO DE SOL</div>            
+        </div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+	     <textarea style="display:none;">Comunico a vossa senhoria que, nesta presente data, no período da manhã/tarde, por volta das 08:00, foi iniciado o corte de cabelo dos internos da ALA ABCDEF, sob a vigilância aproximada dos Policiais Penais discriminados na seção “SERVIDORES” desta ocorrência.</textarea>
+	     <div class="copy-icon">📋</div>
+	     <div class="card-icon">✂️</div>
+	     <div class="card-title">CORTE DE CABELO</div>            
+        </div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+	     <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, foi realizada a entrega dos kits fornecidos pela SAP-CE aos internos das Alas ABCDEF, no período compreendido entre 08h00 e 17h00.
+
+O procedimento foi executado Penais discriminados na seção “SERVIDORES” desta ocorrência, obedecendo às diretrizes de controle de bens e organização institucional, e transcorreu sem alterações.
+
+A entrega foi devidamente acompanhada e registrada para fins de controle e prestação de contas junto à administração da unidade.</textarea>
+	     <div class="copy-icon">📋</div>
+	     <div class="card-icon">📦</div>
+	     <div class="card-title">KITS SAP-CE</div>            
+        </div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+	     <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, foi realizada a entrega dos barbeadores descartáveis aos internos das Alas ABCEDF, durante o(s) período(s) manhã/tarde.
+
+O procedimento foi executado pelos policiais penais discriminados na seção "SERVIDORES" deste documento, seguindo os protocolos de segurança e controle de materiais cortantes estabelecidos por esta unidade.
+
+A entrega transcorreu sem alterações e foi devidamente registrada para fins de controle institucional.</textarea>
+	     <div class="copy-icon">📋</div>
+	     <div class="card-icon">🪒</div>
+	     <div class="card-title">BARBEADORES</div>            
+        </div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+	     <textarea style="display:none;">Comunico a Vossa Senhoria que, durante este plantão, foi realizada a distribuição de água potável conforme o cronograma de distribuição para as ALAS desta unidade. O policial penal responsável pelo procedimento foi discriminado na seção “SERVIDORES” desta ocorrência.</textarea>
+	     <div class="copy-icon">📋</div>
+	     <div class="card-icon">🚰</div>
+	     <div class="card-title">DISTRIB. ÁGUA</div>            
+        </div>
+ 
+	<div class="card-template" onclick="copiarTexto(this)">
+	     <textarea style="display:none;">Comunico a Vossa Senhoria que os Policiais Penais discriminados na seção “SERVIDORES” desta ocorrência encontram-se de prontidão no período compreendido entre 08h00 do dia corrente e 08h00 do dia subsequente, conforme estabelece a escala de serviço vigente...</textarea>
+	     <div class="copy-icon">📋</div>
+	     <div class="card-icon">🚨</div>
+	     <div class="card-title">PRONTIDÃO DOS POLICIAIS PENAIS</div>   
+        </div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+	     <textarea style="display:none;">Comunico a vossa senhoria que, nesta presente data, às 08:00 foi iniciada a visita comum, conforme a programação para as alas __ e __, registra-se os seguintes dados:
+
+ALA _:
+    Início: 08:00
+    Término: 12:00
+    Agendamentos: XXX
+    Presentes:XXX(XX crianças, XX homens, XX mulheres)
+    Ausentes:XX
+
+ALA _:
+    Início: 08:00
+    Término: 12:00
+    Agendamentos: XXX
+    Presentes:XXX(XX crianças, XX homens, XX mulheres)
+    Ausentes:XX
+
+Total de visitas presentes: XXX visitas.</textarea>
+	     <div class="copy-icon">📋</div>
+	     <div class="card-icon">👪</div>
+	     <div class="card-title">QUANT. VISITAS</div>   
+        </div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    	    <textarea style="display:none;">Comunico a Vossa Senhoria que o policial penal xxxxxx é o responsável pela VIATURA POLICIAL neste plantão. O referido veículo foi recebido pelo policial penal supracitado sem alterações.</textarea>
+    	    <div class="copy-icon">📋</div>
+    	    <div class="card-icon">🚓</div>
+    	    <div class="card-title">VIATURA POLICIAL</div>
+	</div>
+  
+        <div class="card-template" onclick="copiarTexto(this)">
+    	    <textarea style="display:none;">Comunico a Vossa Senhoria que o Policial Penal XXXXXX, responsável pela reserva de armamento da Equipe ABCD, recebeu do Policial Penal YYYYYY, responsável pela reserva de armamento da Equipe ABCD, este posto e todo o material bélico sem qualquer alteração.</textarea>
+    	    <div class="copy-icon">📋</div>
+    	    <div class="card-icon">🔫</div>
+    	    <div class="card-title">RESERVA ARMAMENTO</div>
+	</div>
+	
+	<div class="card-template" onclick="copiarTexto(this)">
+   	     <textarea style="display:none;">Comunico a Vossa Senhoria que, por volta das 08h00min, nesta presente data, foi ativado o seguinte posto: TENDA – Lado ABC, pelo Policial penal XXXXXXX. Ressalta-se que referido posto deve permanecer ativo 24 horas, conforme determinação da Secretaria da Administração Penitenciária do Estado do Ceará (SAP-CE).</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">⛺️</div>
+    	     <div class="card-title">TENDA ABC - DIURNO</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+   	     <textarea style="display:none;">Comunico a Vossa Senhoria que, em cumprimento à determinação expedida via CIOPs, os Policiais Penais discriminados na seção "SERVIDORES" estiveram responsáveis pelo guarnecimento da TENDA ABC, conforme o cronograma estabelecido:
+
+PP SERVIDOR 1: das 18:00 ÁS 20:00 e 00:00 ÁS 03:00
+PP SERVIDOR 2: das 20:00 ÀS 00:00 e 03:00 ÀS 06:00
+
+O guarnecimento da TENDA ABC foi realizado dentro dos protocolos operacionais de segurança, garantindo a prevenção de fugas, arremessos de materiais ilícitos e outras ameaças externas à unidade prisional.
+
+Durante o período de vigilância, não houve alterações ou ocorrências a serem reportadas.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">⛺️</div>
+    	     <div class="card-title">TENDA ABC - NOTURNO</div>
+	</div>
+	
+	<div class="card-template" onclick="copiarTexto(this)">
+   	     <textarea style="display:none;">Comunico a vossa senhoria que em cumprimento à determinação expedida via CIOPs, informamos que o policial XXXXXXXXXX, esteve responsável pelo guarnecimento da Guarita G1, conforme o cronograma estabelecido, das 08:00 as 18:00. A atuação do policial penal foi monitorada e registrada dentro dos horários previamente estabelecidos para garantir o cumprimento das normativas de segurança. Durante o período de serviço, nenhuma alteração ou ocorrência significativa foi reportada, demonstrando que o patrulhamento e a vigilância foram realizados de forma eficaz e sem intercorrências.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">🛡️</div>
+    	     <div class="card-title">GUARITA G1(DIURNO)</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+   	     <textarea style="display:none;">Comunico a Vossa Senhoria que, em cumprimento à determinação expedida via CIOPs, os Policiais Penais discriminados na seção "SERVIDORES" estiveram responsáveis pelo guarnecimento da Guarita GX, conforme o cronograma estabelecido:
+
+PP SERVIDOR 1: das 18:00 ÁS 20:00 e 00:00 ÁS 03:00
+PP SERVIDOR 2: das 20:00 ÀS 00:00 e 03:00 ÀS 06:00
+
+O guarnecimento da Guarita GX foi realizado dentro dos protocolos operacionais de segurança, garantindo a prevenção de fugas, arremessos de materiais ilícitos e outras ameaças externas à unidade prisional.
+
+Durante o período de vigilância, não houve alterações ou ocorrências a serem reportadas.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">🧐</div>
+    	     <div class="card-title">GUARITA(NOTURNO)</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a vossa senhoria que a conferência nominal dos internos e o procedimento de bate grade realizado nesta unidade prisional no período das 17:00 às 19h00 estão fundamentados nas normas de segurança, disciplina e fiscalização da execução penal, visando a prevenção de fugas e a manutenção da ordem no ambiente prisional.
+
+O bate grade foi realizado em todas as celas da unidade, como parte da rotina de fiscalização e prevenção de incidentes, assegurando que nenhuma alteração estrutural nas grades ou tentativa de fuga fosse identificada.
+
+O procedimento foi conduzido de acordo com as normas de segurança institucional e monitorado pelos policiais penais listados nesta ocorrência, que atuaram na verificação individual das celas e na conferência nominal dos internos.
+
+Ao término da inspeção, não foram detectadas irregularidades ou alterações na estrutura das celas, garantindo a integridade da segurança da unidade.</textarea>
+    	    <div class="copy-icon">📋</div>
+    	    <div class="card-icon">🔍</div>
+    	    <div class="card-title">CONF. NOMINAL - TARDE</div>
+	</div>
+	
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a vossa senhoria que a conferência nominal dos internos ocorreu no período das 05h00min às 06h00, sendo realizado conforme os fundamentados das normas de segurança, disciplina e fiscalização da execução penal, visando a prevenção de fugas e a manutenção da ordem no ambiente prisional.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">🔍</div>
+    	     <div class="card-title">CONF. NOMINAL - MANHÃ</div>
+	</div>
+	
+        <div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, no período de 08:00 às 17h00, o Policiais Penal XXXXXXX atuou em COMISSÃO, prestando apoio operacional nas rotinas carcerárias desta Unidade Prisional.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">🔄</div>
+    	     <div class="card-title">PP EM COMISSÃO</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que a alimentação destinada ao almoço chegou à unidade às 10h30min. O recebimento, separação e vistoria dos gêneros alimentícios foram realizados pelos Policiais Penais discriminados na seção "SERVIDORES" desta ocorrência, seguindo todos os protocolos operacionais e normas institucionais estabelecidas. A entrega do almoço aos internos ocorreu normalmente, sem o registro de intercorrências durante o processo.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">🍽️</div>
+    		<div class="card-title">RECEBIMENTO ALMOÇO</div>
+	</div>
+
+        <div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que a alimentação destinada ao jantar chegou à unidade às 16h30min. O recebimento, separação e vistoria dos gêneros alimentícios foram realizados pelos Policiais Penais discriminados na seção "SERVIDORES" desta ocorrência, seguindo todos os protocolos operacionais e normas institucionais estabelecidas. A entrega do jantar aos internos ocorreu normalmente, sem o registro de intercorrências durante o processo.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">🍲</div>
+    		<div class="card-title">RECEBIMENTO JANTAR</div>    
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que a alimentação destinada ao café da manhã chegou à unidade às 05h30min. O recebimento, separação e vistoria dos gêneros alimentícios foram realizados pelos Policiais Penais discriminados na seção "SERVIDORES" desta ocorrência, seguindo todos os protocolos operacionais e normas institucionais estabelecidas. A entrega do café da manhã aos internos ocorreu normalmente, sem o registro de intercorrências durante o processo.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">☕</div>
+    		<div class="card-title">RECEBIMENTO CAFÉ</div>   		
+	</div>
+
+        <div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a vossa senhoria que, por volta das 17:00, a técnica de enfermagem XXXXX realizou com sucesso a entrega das medicações em todas as alas, conforme a programação estabelecida. Durante o referido procedimento os policiais penais listados na secção SERVIDORES acompanharam a profissional durante a entrega das medicações.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">💊</div>
+    		<div class="card-title">MEDICAÇÕES - TARDE</div>   		
+	</div>
+
+        <div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a vossa senhoria que, por volta das 05:00, a técnica de enfermagem XXXXX realizou com sucesso a entrega das medicações em todas as alas, conforme a programação estabelecida. Durante o referido procedimento os policiais penais listados na secção SERVIDORES acompanharam a profissional durante a entrega das medicações.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">💊</div>
+    		<div class="card-title">MEDICAÇÕES - MANHÃ</div>   		
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a vossa senhoria que, nesta presente data, Às 17:00, foi realizada a limpeza do Posto de Controle, passarela e enfermaria, a qual foi executada pelos classificados listados na seção CUSTODIADOS, sob o acompanhamento dos policiais penais discriminados na seção "SERVIDORES" desta ocorrência .</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">🧹</div>
+    		<div class="card-title">LIMPEZA</div>   		
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que, após contato do Monitoramento SAP, que informou sobre o uso de vara artesanal na Cela XX desta unidade, foi realizada imediata averiguação pelo Chefe de Equipe XXXXXX.
+
+Durante a inspeção, foi constatado que os internos estavam utilizando uma vara artesanal, confeccionada indevidamente, para acessar energia elétrica por meio da fiação de uma lâmpada instalada no interior da referida ala. A vara artesanal foi prontamente retirada pelos policiais penais discriminados na seção "SERVIDORES" deste documento, eliminando, assim, o risco e a irregularidade.
+
+O fato foi devidamente registrado, e as providências cabíveis estão sendo adotadas para garantir a segurança e a integridade das instalações desta unidade prisional.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">🎣</div>
+    		<div class="card-title">VARA ARTESANAL</div>   		
+	</div>
+
+
+       <div class="card-template" onclick="copiarTexto(this)">
+            	        <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, por volta das 08h00, o interno listado na seção "CUSTODIADOS", foi encaminhado sob escolta para 1/2/3ª VARA CRIMINAL DA COMARCA DE FORTALEZA para participação em AUDIÊNCIA PRESENCIAL. A escolta foi realizada pelos Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+            	        <div class="copy-icon">📋</div>
+                        <div class="card-icon">🚓</div>
+                        <div class="card-title">ESCOLTA AUD</div>
+                  </div>
+       <div class="card-template" onclick="copiarTexto(this)">
+    			<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, por volta das 08h00, o interno listado na seção "CUSTODIADOS", foi encaminhado sob escolta para o [HOSPITAL], a fim de realização de atendimento médico. A escolta foi realizada pelos Policiais Penais discriminados na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+    			<div class="copy-icon">📋</div>
+    			<div class="card-icon">🚓</div>
+    			<div class="card-title">ESCOLTA HOSP</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    			<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, por volta das 08h00, o interno listado na seção "CUSTODIADOS", foi encaminhado sob escolta para PEFOCE - PERÍCIA FORENSE para exame pericial. A escolta foi realizada pelos Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+    			<div class="copy-icon">📋</div>
+    			<div class="card-icon">🚓</div>
+    			<div class="card-title">ESCOLTA PEFOCE</div>
+	</div>
+	
+	<div class="card-template" onclick="copiarTexto(this)">
+    			<textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, por volta das 08h00, o interno listado na seção "CUSTODIADOS", foi encaminhado sob escolta para DELEGACIA DE ITAITINGA para realização de procedimento policial. A escolta foi realizada pelos Policial Penal discriminado na seção "SERVIDORES" desta ocorrência e transcorreu sem alterações.</textarea>
+    			<div class="copy-icon">📋</div>
+    			<div class="card-icon">🚓</div>
+    			<div class="card-title">ESCOLTA DELEGACIA</div>
+	</div>
+
+    </div>
+</div>
+
+<!-- CATEGORIA: ROTINAS ADMINISTRATIVAS -->
+<div class="categoria">
+    <div class="categoria-header" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+        <span style="font-size: 2em;">🏗️</span>
+        <h2>ROTINAS ADMINISTRATIVAS</h2>
+    </div>
+    <div class="cards-grid">
+        <div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que, conforme o Memorando do dia datado de DD/MM/YYYY, esta unidade recebeu a programação oficial das atividades institucionais previstas para o referido dia.
+
+Informo que o documento contendo os detalhes da programação encontra-se anexado a esta ocorrência, para consulta e providências pelas equipes responsáveis.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">📝</div>
+    	     <div class="card-title">MEMORANDO</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que, nesta presente data, o(a) policial penal discriminado na seção "SERVIDORES" deste documento, enviou o seu atestado médico para o chefe de equipe xxxxxx, o qual foi recebido e anexado a esta ocorrência.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">🤢</div>
+    	     <div class="card-title">ATESTADO MED.</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que o Policial Penal XXXXXX, matrícula xxxxxxx, assumiu, nesta presente data, a função de Chefe de Equipe da Equipe ABCD, conforme previamente acordado com a Direção desta unidade prisional.
+
+O referido servidor desempenhou as atribuições inerentes à chefia, realizando a coordenação e supervisão das atividades operacionais do plantão, em conformidade com as normativas e procedimentos institucionais vigentes.
+
+Ressalto que o nome do referido chefe de equipe não aparece na lista de acessos autorizados no sigepen, com isso os acesso ocorrerá com as credenciais do chefe de equipe XXXXX.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">🟠</div>
+    	     <div class="card-title">CHEFE DESIGNADO</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que segue em anexo as escalas referentes ao período diurno do dia DD/MM/YYYY, para conhecimento e providências cabíveis.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">⚙️</div>
+    	     <div class="card-title">ESCALAS DIURNA</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que segue em anexo as escalas referentes ao período noturno do dia DD/MM/YYYY, para conhecimento e providências cabíveis.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">⚙️</div>
+    	     <div class="card-title">ESCALA NOTURNA</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que seguem abaixo as informações repassadas pelo fiscal da Polícia Militar,  ST ALENCAR 11284515, sobre as guaritas ocupadas pela PM nesta unidade:
+
+G6 – CB  JALES 30877411
+08:00 - 11:00 | 14:00 - 17:00 | 20:00 - 23:00 | 02:00 - 05:00
+
+G6 – ST ALENCAR 11284515
+11:00 - 14:00 | 17:00 - 18:00 |23:00 - 02:00 | 05:00 - 08:00</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">⚙️</div>
+    	     <div class="card-title">ESCALA PM</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que o Policial Penal xxxxxxx, matrícula xxxxxxx, esteve presente nesta unidade prisional no dia dd/mm/yyyy, cumprindo 24 (vinte e quatro) horas de plantão, conforme estabelecido em seu Termo de Ajuste de Conduta.
+
+Ressalto que o Chefe de Equipe xxxxxxx, mat xxxxxxx, encontra-se ciente do referido cumprimento.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">✅</div>
+    	     <div class="card-title">REGISTRO TAC</div>
+	</div>
+	
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, o policial penal XXXXXX não pôde registrar a biometria de entrada/saída do plantão/abono no horário regulamentar de 00:00. Registra-se que o servidor encontrava-se, desde o início do plantão/abono, no posto o qual foi escalado.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">🕐</div>
+    	     <div class="card-title">ATRASO BIOMÉTRICO</div>
+	</div>
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a vossa senhoria que, nesta presente data, o policial penal xxxxxx está compensando o plantão referente ao dia DD/MM/2026, no cumprimento de carga horária de 24h.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">👮</div>
+    	     <div class="card-title">COMPENSANDO</div>
+	</div>
+
+ 	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que o policial penal XXXXXXXX não conseguiu retirar a bodycam, nesta presente data, às HH:MIN, devido a quantidade insuficiente disponível para a retirada do equipamento.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">📹</div>
+    	     <div class="card-title">NÃO RETIRADA DE BODYCAM</div>
+	</div>
+	
+	<div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, o(a) Policial Penal xxxxxxx permaneceu, no horário de 08h00 às 18h00, desempenhando atividades administrativas no setor de Processo Administrativo Disciplinar (PAD), em atendimento às rotinas desta unidade prisional.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">📋</div>
+    	     <div class="card-title">Setor PAD</div>
+	</div>
+	
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, policiais penais discriminados na seção "SERVIDORES" desta ocorrência exerceram atividades de abono ENTREGA DE KITS, das 08h00 às 18h00. As atividades ocorreram dentro da normalidade, sem registro de intercorrências.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">📦</div>
+    		<div class="card-title">ABONO - ENTREGA DE KITS</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, os policiais penais discriminados na seção "SERVIDORES" desta ocorrência exerceram atividades de ROTINAS PRISIONAIS, abrangendo abono diurno no período das 08h00 às 18h00. Durante todo o expediente, as atividades operacionais foram realizadas conforme as normas institucionais, sem registro de qualquer intercorrência ou irregularidade.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">⏰</div>
+    		<div class="card-title">ABONO ROTINA</div>
+	</div>
+	
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, os policiais penais discriminados na seção "SERVIDORES" desta ocorrência exerceram atividades de ABONO GUARITA, no período das 20h00 às 06h00. Durante todo o expediente, as atividades de vigilância e controle de acesso foram realizadas conforme as normas institucionais, sem registro de qualquer intercorrência ou irregularidade.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">🔐</div>
+    		<div class="card-title">ABONO GUARITA</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, os policiais penais discriminados na seção "SERVIDORES" desta ocorrência exerceram atividades de ABONO COEAP, no período das 08h00 às 18h00. Durante todo o expediente, as atividades de apoio operacional foram realizadas conforme as normas institucionais, sem registro de qualquer intercorrência ou irregularidade.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">📗</div>
+    		<div class="card-title">ABONO COEAP</div>
+	</div>
+	
+        <div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, os policiais penais discriminados na seção "SERVIDORES" desta ocorrência exerceram atividades de ABONO COISPE, no período das 08h00 às 18h00. Durante todo o expediente, as atividades foram realizadas conforme as normas institucionais, sem registro de qualquer intercorrência ou irregularidade.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">💡</div>
+    		<div class="card-title">ABONO COISPE</div>
+	</div>
+
+	<div class="card-template" onclick="copiarTexto(this)">
+    		<textarea style="display:none;">Comunico a Vossa Senhoria que, na presente data, o Diretor/Adjunto/Gerente XXXXXXX cumpriu carga horária das 08h00 às 18h00, atuando em regime de abono extraordinário na condição de gestor desta unidade prisional. Durante todo o expediente, as atividades de gestão e supervisão foram realizadas conforme as normas institucionais, sem registro de qualquer intercorrência ou irregularidade.</textarea>
+    		<div class="copy-icon">📋</div>
+    		<div class="card-icon">👔</div>
+    		<div class="card-title">ABONO GESTOR</div>
+	</div>
+
+    </div>
+</div>
+
+<!-- CATEGORIA: INFRAESTRUTURA -->
+<div class="categoria">
+    <div class="categoria-header" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+        <span style="font-size: 2em;">🏗️</span>
+        <h2>INFRAESTRUTURA</h2>
+    </div>
+    <div class="cards-grid">
+        <div class="card-template" onclick="copiarTexto(this)">
+    	     <textarea style="display:none;">Comunico a vossa senhoria que, nesta presente data, o policial penal XXXXXXXX supervisionou os colaboradores da EMPRESA XXXXXX, no serviço de XXXXXXXXX. Todo o procedimento ocorreu de 08h30 a 16h30, sem intercorrências.</textarea>
+    	     <div class="copy-icon">📋</div>
+    	     <div class="card-icon">🏗️</div>
+    	     <div class="card-title">SERVIÇO DE INFRAESTRUTURA</div>   
+	</div>
+
+    </div>
+</div>
+
+
+
+    </div>
+ </div>
+    <script>
+
+// Verificar login
+if (!sessionStorage.getItem('usuarioLogado')) {
+    window.location.href = 'index.html';
+}
+        function copiarTexto(elemento) {
+            // Pega o texto do textarea oculto dentro do card
+            const texto = elemento.querySelector('textarea').value;
+            
+            // Copia para a área de transferência
+            navigator.clipboard.writeText(texto).then(() => {
+                // Mostra a notificação
+                mostrarNotificacao();
+            }).catch(err => {
+                console.error('Erro ao copiar:', err);
+                alert('Erro ao copiar o texto. Tente novamente.');
+            });
+        }
+
+        function mostrarNotificacao() {
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            
+            // Remove a notificação após 2 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

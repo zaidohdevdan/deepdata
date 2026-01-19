@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#667eea" />
+  <title>Escalas de Plantão - UPI-4</title>
+
+  <!-- PapaParse (CDN estável) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5/papaparse.min.js"></script>
+
+  <!-- jsPDF + AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at top, #dbeafe 0, #eff6ff 40%, #f9fafb 100%);
+  min-height: 100vh;
+  padding: 24px;
+}
+/* ===== CONTAINER PRINCIPAL ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ===== HEADER ===== */
+.header {
+  position: relative;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 26px 32px 24px;
+  margin-bottom: 24px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.10),
+    0 0 0 1px rgba(148, 163, 184, 0.25);
+  text-align: left;
+}
+
+.header h1 {
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* “pílulas” no topo (Chefe/Equipe/Data) */
+.header-inputs {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 500;
+  color: #64748b;
+  min-width: 220px;
+}
+
+.header-inputs input {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  transition: 0.18s ease;
+}
+
+.header-inputs input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.45);
+  background: #ffffff;
+}
+
+   /* ===== PAINEL DE CONTROLES ===== */
+.controls-panel {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  box-shadow:
+    0 16px 36px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(226, 232, 240, 0.9);
+}
+
+.controls-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+    .file-input-wrapper{ position: relative; overflow: hidden; display: inline-block; }
+    .file-input-wrapper input[type=file]{ position:absolute; left:-9999px; }
+
+    /* Botão CSV estilo pill claro */
+.file-input-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  transition: 0.18s ease;
+}
+
+.file-input-label:hover {
+  background: #e5f0ff;
+  transform: translateY(-1px);
+}
+/* BASE PARA TODOS OS BOTÕES DE AÇÃO */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #2563eb; /* valor default, pode ser azul */
+  transition: 0.18s ease;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+  line-height: 1;        /* garante mesma altura visual */
+}
+
+/* VARIAÇÕES DE COR */
+.btn-primary { background: #2563eb; }  /* Auto-ocupar */
+.btn-success { background: #16a34a; }  /* Gravar / PDF */
+.btn-danger  { background: #ef4444; }  /* Limpar */
+.btn-voltar  { background: #64748b; }  /* Voltar cinza */
+
+/* HOVER ÚNICO */
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+}
+
+   /* Chips de input (Hora inicial/final/Faixas) */
+select,
+input[type="time"] {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  outline: none;
+  transition: 0.18s ease;
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+select:focus,
+input[type="time"]:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.45);
+  background: #ffffff;
+}
+
+    .upload-area{
+      background: white;
+      border: 2px dashed #e2e8f0;
+      border-radius: 15px;
+      padding: 24px;
+      text-align:center;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+      transition: .2s;
+      cursor: pointer;
+    }
+    .upload-area:hover{
+      border-color:#667eea;
+      background:#f7fbff;
+    }
+    .upload-area small{ color:#718096; }
+
+ /* ===== BOARD DE FAIXAS ===== */
+.postos-container {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 26px;
+  padding: 20px 22px;
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.10),
+    0 0 0 1px rgba(226, 232, 240, 0.9);
+  margin-bottom: 18px;
+}
+
+.postos-title {
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.postos-title span {
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* Grid de colunas */
+.faixas-board {
+  display: grid;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.board-1 { grid-template-columns: repeat(1, minmax(260px, 1fr)); }
+.board-2 { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+.board-3 { grid-template-columns: repeat(3, minmax(240px, 1fr)); }
+.board-4 { grid-template-columns: repeat(4, minmax(220px, 1fr)); }
+
+.faixa-col {
+  background: linear-gradient(180deg,
+    rgba(239, 246, 255, 0.85),
+    rgba(255, 255, 255, 0.9)
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 24px;
+  padding: 14px 12px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+}
+
+/* Cabeçalho da faixa como pill azul */
+.faixa-header {
+  background: #38bdf8;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 10px 16px;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.faixa-sub {
+  font-weight: 600;
+  opacity: 0.96;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+/* ===== POSTOS ===== */
+.posto {
+  border-radius: 18px;
+  padding: 10px 12px;
+  background: #ffffff;
+  min-height: 90px;
+  margin-bottom: 10px;
+  transition: 0.18s ease;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.posto.unoccupied {
+  border-style: dashed;
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
+
+.posto.drag-over {
+  border-color: #38bdf8 !important;
+  background: #eff6ff !important;
+  transform: translateY(-1px);
+}
+
+.posto-header {
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.posto-header small {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* ===== CHIPS DE POLICIAL ===== */
+.policial {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border-radius: 999px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  cursor: move;
+  user-select: none;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 10px rgba(148, 163, 184, 0.35);
+  transition: 0.16s ease;
+}
+
+.policial::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #38bdf8;
+  flex-shrink: 0;
+}
+
+.policial strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.policial br {
+  display: none; /* nome + matrícula na mesma linha */
+}
+
+.policial {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.policial:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(148, 163, 184, 0.6);
+}
+
+.policial.dragging {
+  opacity: 0.6;
+  transform: scale(1.02);
+}
+
+
+    /* ===== FAIXAS HORÁRIAS RESUMO ===== */
+.horario-section {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 8px 4px 18px;
+  margin-bottom: 4px;
+}
+
+.horario-section h3 {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.horario-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.faixa-card {
+  background: #e0f2fe;
+  color: #0f172a;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 12px;
+}
+     
+   /* Botões Voltar / Logout mais suaves */
+.btn-logout {
+  position: absolute;
+  top: 18px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.18s ease;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.15);
+}
+
+.btn-logout {
+  right: 18px;
+  background: #f97373;
+  color: #fef2f2;
+}
+
+.btn-logout:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.20);
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 12px 4px;
+  text-align: center;
+}
+
+.footer-content {
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.footer-content strong {
+  color: #0f172a;
+}
+
+#currentTime {
+  color: #60a5fa;
+  font-weight: 600;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+/* ===== DESKTOP PADRÃO (≥ 1025px) ===== */
+/* (nada especial aqui, usa as definições base) */
+
+/* ===== TABLETS / NOTEBOOKS PEQUENOS (max-width: 1024px) ===== */
+@media (max-width: 1024px) {
+  body {
+    padding: 16px;
+  }
+
+  .container {
+    max-width: 100%;
+  }
+
+  /* 4 faixas viram 2 colunas para caber melhor */
+  .board-4 {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+
+  .header {
+    border-radius: 24px;
+    padding: 22px 20px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+}
+
+/* ===== TABLETS PEQUENOS / CELULARES GRANDES (max-width: 768px) ===== */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .header {
+    padding: 18px 16px 16px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .header-inputs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-inputs label {
+    min-width: 100%;
+  }
+
+  .file-input-label,
+  .btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 13px;
+    padding: 9px 14px;   /* todos iguais em mobile */
+  }
+
+  .btn-logout {
+    top: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
+  }
+
+  .controls-panel {
+    padding: 12px 10px;
+  }
+
+  .controls-row {
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  /* Board: sempre 1 coluna para qualquer quantidade de faixas */
+  .board-2,
+  .board-3,
+  .board-4,
+  .board-1 {
+    grid-template-columns: 1fr;
+  }
+
+  .faixa-col {
+    border-radius: 20px;
+  }
+
+  .postos-container {
+    padding: 16px 12px;
+  }
+
+  .horario-grid {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .faixa-card {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+}
+
+/* ===== CELULARES PEQUENOS (max-width: 480px) ===== */
+@media (max-width: 480px) {
+  body {
+    padding: 8px;
+  }
+
+  .header {
+    padding-top: 40px; /* espaço pros botões flutuantes */
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .btn {
+    font-size: 11px;
+    padding: 6px 10px;   /* novamente, todos iguais */
+  }
+
+  .btn-logout {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .postos-container {
+    padding: 14px 10px;
+  }
+
+  .policial {
+    font-size: 11px;
+    padding: 7px 9px;
+  }
+
+  .footer-content {
+    font-size: 12px;
+  }
+
+  #currentTime {
+    font-size: 11px;
+  }
+}
+
+/* ===== MODO PAISAGEM EM CELULARES BAIXOS (altura ≤ 500px) ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+  body {
+    padding: 6px;
+  }
+
+  .header {
+    padding: 14px 12px;
+  }
+
+  .postos-container {
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+}
+
+/* ===== IMPRESSÃO (TODOS OS DISPOSITIVOS) ===== */
+/* ===== IMPRESSÃO (TODOS OS DISPOSITIVOS) ===== */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    padding: 0;
+  }
+
+  /* Esconde apenas controles de interação */
+  .controls-panel,
+  .upload-area,
+  .btn,
+  .btn-logout {
+    display: none !important;
+  }
+
+  /* Mantém apenas a escala e cabeçalho “limpos” para impressão */
+  .postos-container,
+  .horario-section,
+  .header,
+  footer {
+    box-shadow: none !important;
+    border-radius: 0;
+  }
+
+  /* Remove gradiente de fundo para economizar tinta */
+  body {
+    background: #ffffff !important;
+  }
+}
+
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      
+<button id="btnLogout" class="btn-logout">🚪 Sair</button>
+      <h1>🛡️ Escalas de Plantão</h1>
+      <p class="subtitle">Unidade Prisional de Itaitinga 4 - UPI-4</p>
+      <div class="header-inputs">
+        <label>Chefe de Equipe
+          <input id="chefe" type="text" placeholder="Digite o nome do chefe" />
+        </label>
+        <label>Nome da Equipe
+          <input id="equipe" type="text" placeholder="Digite o nome da equipe" />
+        </label>
+        <label>Data
+          <input id="data" type="date" />
+        </label>
+      </div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="controls-row">
+        <div class="file-input-wrapper">
+          <input id="csvFile" type="file" accept=".csv,text/csv" />
+          <label for="csvFile" class="file-input-label">📁 Carregar CSV</label>
+        </div>
+
+        <label>H.Início
+          <input type="time" id="horaInicio" value="00:00" />
+        </label>
+        <label>H.Fim
+          <input type="time" id="horaFim" value="06:00" />
+        </label>
+
+        <label>Faixas
+          <select id="faixas">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+        <button class="btn btn-voltar" id="btnVoltar">← Voltar</button>
+        <button class="btn btn-primary" id="btnAuto">⚙️ Auto-Ocupar</button>
+        <button class="btn btn-success" id="btnSalvar">💾 Gravar</button>
+        <button class="btn btn-danger" id="btnLimpar">🗑️ Limpar</button>
+        <button class="btn btn-success" id="btnPdf">🖨️ Imprimir PDF</button>
+      </div>
+    </div>
+
+    <div class="upload-area" id="uploadArea" title="Clique ou arraste o CSV aqui">
+      <p><strong>📤 Arraste o CSV aqui</strong> ou clique para selecionar</p>
+      <small>Formato por linha: nome_do_policial_penal,matricula_do_policial_penal</small>
+    </div>
+
+    <div class="postos-container">
+      <div class="postos-title">
+        <div>Postos por faixa (colunas) • arraste e solte</div>
+        <span>Dica: o mesmo PP pode estar em faixas diferentes, mas não em 2 postos da mesma faixa.</span>
+      </div>
+      <div id="faixasBoard" class="faixas-board board-2"></div>
+    </div>
+
+    <div class="horario-section">
+      <h3>📅 Faixas Horárias</h3>
+      <div id="horarios" class="horario-grid"></div>
+    </div>
+
+    <footer>
+      <div class="footer-content">
+        <strong>UP ITAITINGA 4</strong> - Itaitinga, <span id="currentDate"></span>
+      </div>
+      <div id="currentTime"></div>
+    </footer>
+  </div>
+
+  <script>
+
+
+  // Registra o Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registrado com sucesso:', registration.scope);
+        })
+        .catch(error => {
+          console.log('Falha ao registrar Service Worker:', error);
+        });
+    });
+  }
+
+//Verificar autenticação antes de carregar
+if (!sessionStorage.getItem('usuarioLogado')) {
+    window.location.href = 'index.html';
+}
+
+// Logout
+document.getElementById('btnLogout').addEventListener('click', () => {
+    if (confirm('Deseja sair?')) {
+        sessionStorage.removeItem('usuarioLogado');
+        window.location.href = 'index.html';
+    }
+});
+
+
+document.getElementById("btnVoltar").addEventListener("click", () => {
+  // Volta para dashboard/index.html (ajuste conforme sua estrutura)
+  window.location.href = "index.html";
+});
+
+
+    // ===== CONFIG =====
+    const postosConfig = {
+      "P2": 1,
+      "VISOR": 1,
+      "CONTROLE": 1,
+      "SUP ABC": 2,
+      "SUP DEF": 2,
+    };
+
+    const LS_KEY = "escalaUPI4_faixas_v1";
+
+    // ===== STATE =====
+    let basePoliciais = []; // [{nome, matricula}]
+    let tokenIndex = new Map(); // tokenId -> {nome, matricula, faixa}
+    let faixasHorario = []; // [{inicio,fim}]
+    // estado: { [faixaNumber]: { [posto]: [tokenId...] } }
+    let estado = {};
+
+    // ===== UTILS =====
+    const $ = (sel) => document.querySelector(sel);
+
+    function normalize(s) { return String(s ?? "").trim(); }
+
+    function minutes(hhmm) {
+      const [h,m] = hhmm.split(":").map(Number);
+      return h*60 + m;
+    }
+    function toHHMM(min) {
+      const h = Math.floor(min/60) % 24;
+      const m = Math.floor(min%60);
+      return String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0");
+    }
+
+    function todayISO() {
+      const d = new Date();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${d.getFullYear()}-${mm}-${dd}`;
+    }
+
+    // ===== HORÁRIOS =====
+    function calcularFaixas() {
+      const iniStr = $("#horaInicio").value;
+      const endStr = $("#horaFim").value;
+      const n = parseInt($("#faixas").value, 10);
+
+      if (!iniStr || !endStr || !n) return [];
+
+      let ini = minutes(iniStr);
+      let end = minutes(endStr);
+      if (end <= ini) end += 24*60; // vira o dia
+
+      const total = end - ini;
+      const step = total / n;
+
+      const out = [];
+      for (let i=0; i<n; i++) {
+        const a = ini + step*i;
+        const b = ini + step*(i+1);
+        out.push({ inicio: toHHMM(a), fim: toHHMM(b) });
+      }
+      return out;
+    }
+
+    function renderHorarios() {
+      const box = $("#horarios");
+      box.innerHTML = "";
+      faixasHorario.forEach((f, idx) => {
+        const el = document.createElement("div");
+        el.className = "faixa-card";
+        el.innerHTML = `Faixa ${idx+1}<br>${f.inicio} - ${f.fim}`;
+        box.appendChild(el);
+      });
+    }
+
+    // ===== TOKENS (um por policial por faixa) =====
+    function tokenId(matricula, faixaIdx) {
+      // 1 token por faixa => permite repetir o mesmo policial em faixas diferentes
+      return `PP_${String(matricula).replace(/\s/g,"")}_F${faixaIdx}`;
+    }
+
+    function rebuildTokens() {
+      tokenIndex.clear();
+      const n = parseInt($("#faixas").value, 10);
+
+      for (let f=0; f<n; f++) {
+        basePoliciais.forEach(pp => {
+          const id = tokenId(pp.matricula, f);
+          tokenIndex.set(id, { ...pp, faixa: f });
+        });
+      }
+    }
+
+    // ===== ESTADO =====
+    function resetEstadoVazio() {
+      const n = parseInt($("#faixas").value, 10);
+      estado = {};
+      for (let f=0; f<n; f++) {
+        estado[f] = {};
+        for (const posto of Object.keys(postosConfig)) estado[f][posto] = [];
+        estado[f]["POOL"] = []; // pool da faixa
+      }
+    }
+
+    function preencherPoolComTodos() {
+      const n = parseInt($("#faixas").value, 10);
+      for (let f=0; f<n; f++) {
+        estado[f]["POOL"] = basePoliciais.map(pp => tokenId(pp.matricula, f));
+        for (const posto of Object.keys(postosConfig)) estado[f][posto] = [];
+      }
+    }
+
+    // ===== RENDER BOARD (colunas por faixa) =====
+    function boardClass(n) {
+      return n===1 ? "board-1" : n===2 ? "board-2" : n===3 ? "board-3" : "board-4";
+    }
+
+    function makePostZone(faixaIdx, posto) {
+      const cap = posto === "POOL" ? "Todos" : `${postosConfig[posto]} PP`;
+      const el = document.createElement("div");
+      el.className = "posto unoccupied";
+      el.dataset.faixa = String(faixaIdx);
+      el.dataset.posto = posto;
+      el.innerHTML = `
+        <div class="posto-header">
+          <div>${posto === "POOL" ? "🔄 Pool" : posto}</div>
+          <small>${cap}</small>
+        </div>
+      `;
+      return el;
+    }
+
+    function renderBoard() {
+      const n = parseInt($("#faixas").value, 10);
+      const board = $("#faixasBoard");
+      board.className = `faixas-board ${boardClass(n)}`;
+      board.innerHTML = "";
+
+      for (let f=0; f<n; f++) {
+        const col = document.createElement("div");
+        col.className = "faixa-col";
+        const header = document.createElement("div");
+        header.className = "faixa-header";
+        const faixa = faixasHorario[f] || { inicio: "--:--", fim: "--:--" };
+        header.innerHTML = `Faixa ${f+1}<div class="faixa-sub">${faixa.inicio} - ${faixa.fim}</div>`;
+        col.appendChild(header);
+
+        // Pool primeiro
+        col.appendChild(makePostZone(f, "POOL"));
+
+        // Postos em pilha
+        for (const posto of Object.keys(postosConfig)) {
+          col.appendChild(makePostZone(f, posto));
+        }
+
+        board.appendChild(col);
+      }
+
+      aplicarEstadoNoDOM();
+      verificarPostos();
+    }
+
+    function criarCard(tokenIdStr) {
+      const meta = tokenIndex.get(tokenIdStr);
+      if (!meta) return null;
+
+      const el = document.createElement("div");
+      el.className = "policial";
+      el.draggable = true;
+      el.dataset.token = tokenIdStr;
+      el.dataset.faixa = String(meta.faixa);
+      el.dataset.matricula = meta.matricula;
+      el.innerHTML = `<strong>${meta.nome}</strong><br>${meta.matricula}`;
+      return el;
+    }
+
+    function aplicarEstadoNoDOM() {
+      // limpa cards mantendo headers
+      document.querySelectorAll(".posto").forEach(z => {
+        const header = z.querySelector(".posto-header");
+        z.innerHTML = "";
+        if (header) z.appendChild(header);
+      });
+
+      // coloca cards
+      const n = parseInt($("#faixas").value, 10);
+      for (let f=0; f<n; f++) {
+        for (const posto of ["POOL", ...Object.keys(postosConfig)]) {
+          const zone = document.querySelector(`.posto[data-faixa="${f}"][data-posto="${posto}"]`);
+          if (!zone) continue;
+
+          const ids = (estado?.[f]?.[posto]) || [];
+          ids.forEach(tid => {
+            const card = criarCard(tid);
+            if (card) zone.appendChild(card);
+          });
+        }
+      }
+    }
+
+    function lerEstadoDoDOM() {
+      const n = parseInt($("#faixas").value, 10);
+      const novo = {};
+      for (let f=0; f<n; f++) {
+        novo[f] = {};
+        for (const posto of ["POOL", ...Object.keys(postosConfig)]) novo[f][posto] = [];
+      }
+
+      document.querySelectorAll(".posto").forEach(zone => {
+        const f = parseInt(zone.dataset.faixa, 10);
+        const posto = zone.dataset.posto;
+        const ids = Array.from(zone.querySelectorAll(".policial")).map(el => el.dataset.token);
+        novo[f][posto] = ids;
+      });
+
+      estado = novo;
+    }
+
+    function verificarPostos() {
+      document.querySelectorAll(".posto").forEach(zone => {
+        const posto = zone.dataset.posto;
+        if (posto === "POOL") {
+          zone.classList.remove("unoccupied");
+          return;
+        }
+        const count = zone.querySelectorAll(".policial").length;
+        zone.classList.toggle("unoccupied", count === 0);
+      });
+    }
+
+    // ===== DRAG & DROP =====
+    document.addEventListener("dragstart", (ev) => {
+      const card = ev.target.closest(".policial");
+      if (!card) return;
+      card.classList.add("dragging");
+      // DataTransfer.setData é o padrão do drag&drop [web:45]
+      ev.dataTransfer.setData("text/plain", card.dataset.token);
+    });
+
+    document.addEventListener("dragend", (ev) => {
+      const card = ev.target.closest(".policial");
+      if (!card) return;
+      card.classList.remove("dragging");
+    });
+
+    document.addEventListener("dragover", (ev) => {
+      const zone = ev.target.closest(".posto");
+      if (!zone) return;
+      ev.preventDefault();
+      zone.classList.add("drag-over");
+    });
+
+    document.addEventListener("dragleave", (ev) => {
+      const zone = ev.target.closest(".posto");
+      if (!zone) return;
+      zone.classList.remove("drag-over");
+    });
+
+    document.addEventListener("drop", (ev) => {
+      const zone = ev.target.closest(".posto");
+      if (!zone) return;
+      ev.preventDefault();
+      zone.classList.remove("drag-over");
+
+      const token = ev.dataTransfer.getData("text/plain");
+      const card = document.querySelector(`.policial[data-token="${token}"]`);
+      if (!card) return;
+
+      const faixaDestino = parseInt(zone.dataset.faixa, 10);
+      const matricula = card.dataset.matricula;
+
+      // regra: na MESMA faixa, o mesmo PP não pode estar em 2 postos.
+      // então, ao soltar, remove de qualquer outro posto da mesma faixa (move).
+      document.querySelectorAll(`.posto[data-faixa="${faixaDestino}"] .policial[data-matricula="${CSS.escape(matricula)}"]`)
+        .forEach(el => {
+          if (el !== card) el.remove();
+        });
+
+      zone.appendChild(card);
+      lerEstadoDoDOM();
+      verificarPostos();
+    });
+
+    // Função ajustada: Chama o AutoOcupar direto ao terminar de ler
+function parseCSVFile(file) {
+  if (!file) return;
+
+  Papa.parse(file, {
+    skipEmptyLines: true,
+    complete: (results) => {
+      const rows = results.data || [];
+      const temp = [];
+
+      rows.forEach(r => {
+        // Lógica de leitura (igual anterior)
+        if (Array.isArray(r)) {
+          let nome = normalize(r[0]);
+          let matricula = normalize(r[1]);
+          if ((!matricula || r.length < 2) && typeof r[0] === "string") {
+            const parts = r[0].split(";").map(s => s.trim());
+            if (parts.length >= 2) { nome = parts[0]; matricula = parts[1]; }
+          }
+          if (nome && matricula) temp.push({ nome, matricula });
+        } else if (typeof r === "string") {
+          const parts = r.includes(";") ? r.split(";") : r.split(",");
+          if (parts.length >= 2) temp.push({ nome: normalize(parts[0]), matricula: normalize(parts[1]) });
+        }
+      });
+
+      // Remove duplicados da lista base
+      const seen = new Set();
+      basePoliciais = temp.filter(pp => {
+        const key = pp.matricula;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      faixasHorario = calcularFaixas();
+      rebuildTokens(); // Registra os tokens possíveis
+      
+      // MUDANÇA AQUI: Não enche o Pool. Chama autoOcupar direto.
+      autoOcupar(); 
+
+      $("#uploadArea").style.display = "none";
+      renderHorarios();
+      renderBoard();
+
+      // Feedback visual (opcional)
+      // alert(`CSV carregado e distribuído: ${basePoliciais.length} policiais.`);
+    }
+  });
+}
+
+    // ===== AUTO-OCUPAR =====
+    // Função ajustada: Distribui SEQUENCIALMENTE (não repete o policial)
+function autoOcupar() {
+  if (!basePoliciais.length) {
+    alert("Carregue o CSV primeiro.");
+    return;
+  }
+
+  // 1. Limpa todo o estado (ninguém em nenhum posto)
+  resetEstadoVazio(); 
+  
+  const nFaixas = parseInt($("#faixas").value, 10);
+  let ppIndex = 0; // Ponteiro para percorrer a lista de policiais
+  const totalPP = basePoliciais.length;
+
+  // 2. Percorre Faixa por Faixa e preenche os postos
+  for (let f = 0; f < nFaixas; f++) {
+    for (const [posto, limit] of Object.entries(postosConfig)) {
+      // Pula Controle agora, deixa para o excedente
+      if (posto === "CONTROLE") continue;
+
+      for (let i = 0; i < limit; i++) {
+        if (ppIndex < totalPP) {
+          const pp = basePoliciais[ppIndex];
+          // Cria o token específico para ESTA faixa
+          const token = tokenId(pp.matricula, f);
+          estado[f][posto].push(token);
+          ppIndex++;
+        }
+      }
+    }
+  }
+
+  // 3. Se sobrou gente, distribui no CONTROLE (rotacionando entre as faixas para equilibrar)
+  let fControle = 0;
+  while (ppIndex < totalPP) {
+    const pp = basePoliciais[ppIndex];
+    const token = tokenId(pp.matricula, fControle);
+    estado[fControle]["CONTROLE"].push(token);
+    
+    ppIndex++;
+    // Passa para a próxima faixa (round-robin)
+    fControle = (fControle + 1) % nFaixas;
+  }
+
+  aplicarEstadoNoDOM();
+  verificarPostos();
+}
+
+    // ===== LOCALSTORAGE =====
+    function salvar() {
+      lerEstadoDoDOM();
+      const payload = {
+        chefe: $("#chefe").value || "",
+        equipe: $("#equipe").value || "",
+        data: $("#data").value || "",
+        horaInicio: $("#horaInicio").value,
+        horaFim: $("#horaFim").value,
+        faixas: $("#faixas").value,
+        basePoliciais,
+        estado
+      };
+      localStorage.setItem(LS_KEY, JSON.stringify(payload));
+      alert("Escala gravada no localStorage.");
+    }
+
+    function limpar() {
+      if (!confirm("Limpar tudo?")) return;
+      localStorage.removeItem(LS_KEY);
+      basePoliciais = [];
+      tokenIndex.clear();
+      faixasHorario = calcularFaixas();
+      resetEstadoVazio();
+
+      $("#uploadArea").style.display = "block";
+      renderHorarios();
+      renderBoard();
+    }
+
+    function carregarStorage() {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return;
+
+      try {
+        const data = JSON.parse(raw);
+
+        $("#chefe").value = data.chefe || "";
+        $("#equipe").value = data.equipe || "";
+        $("#data").value = data.data || todayISO();
+
+        $("#horaInicio").value = data.horaInicio || "00:00";
+        $("#horaFim").value = data.horaFim || "06:00";
+        $("#faixas").value = data.faixas || "2";
+
+        basePoliciais = Array.isArray(data.basePoliciais) ? data.basePoliciais : [];
+        faixasHorario = calcularFaixas();
+        rebuildTokens();
+
+        // estado pode estar com número de faixas diferente — normaliza
+        resetEstadoVazio();
+        if (data.estado && typeof data.estado === "object") {
+          const n = parseInt($("#faixas").value, 10);
+          for (let f=0; f<n; f++) {
+            for (const posto of ["POOL", ...Object.keys(postosConfig)]) {
+              const arr = data.estado?.[f]?.[posto];
+              if (Array.isArray(arr)) estado[f][posto] = arr.filter(id => tokenIndex.has(id));
+            }
+          }
+        } else {
+          preencherPoolComTodos();
+        }
+
+        $("#uploadArea").style.display = basePoliciais.length ? "none" : "block";
+
+        renderHorarios();
+        renderBoard();
+      } catch (e) {
+        // ignora
+      }
+    }
+
+    // ===== PDF =====
+    function imprimirPDF() {
+  // Garanta horários atualizados (para os rótulos das colunas)
+  faixasHorario = calcularFaixas();
+
+  // Garanta estado sincronizado com tela (se você usa drag/drop)
+  // Se sua função se chama diferente, ajuste aqui:
+  if (typeof lerEstadoDoDOM === "function") lerEstadoDoDOM();
+
+  const { jsPDF } = window.jspdf;
+
+  // Landscape deixa as colunas das faixas bem mais legíveis (A4 em 1 página, quando possível). [web:112]
+  const doc = new jsPDF("l", "mm", "a4");
+
+  const chefe = (document.querySelector("#chefe")?.value || "__________").trim();
+  const equipe = (document.querySelector("#equipe")?.value || "__________").trim();
+  const data = (document.querySelector("#data")?.value || new Date().toISOString().slice(0,10)).trim();
+  const horaInicio = document.querySelector("#horaInicio")?.value || "--:--";
+  const horaFim = document.querySelector("#horaFim")?.value || "--:--";
+  const nFaixas = parseInt(document.querySelector("#faixas")?.value || "1", 10);
+
+  const pageW = doc.internal.pageSize.getWidth();
+
+  // ===== Cabeçalho (mantém o que você gostou)
+  const marginX = 8;
+  let y = 8;
+
+  doc.setFillColor(102, 126, 234);
+  doc.rect(marginX, y, pageW - marginX * 2, 18, "F");
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(14);
+  doc.setFont(undefined, "bold");
+  doc.text("ESCALA DE PLANTÃO - UPI-4", pageW / 2, y + 6.5, { align: "center" });
+
+  doc.setFontSize(9);
+  doc.setFont(undefined, "normal");
+  doc.text(`Chefe: ${chefe} | Equipe: ${equipe} | Data: ${data}`, pageW / 2, y + 12.2, { align: "center" });
+  doc.text(`Período: ${horaInicio} às ${horaFim}`, pageW / 2, y + 16.5, { align: "center" });
+
+  // ===== Helpers para ler o estado (suporta 2 formatos)
+  function getIds(f, posto) {
+    // Formato 1: estado[f][posto]
+    if (typeof estado !== "undefined" && estado?.[f]?.[posto]) return estado[f][posto];
+
+    // Formato 2: estadoEscala["POSTO_F0"]
+    const k = `${posto}_F${f}`;
+    if (typeof estadoEscala !== "undefined" && estadoEscala?.[k]) return estadoEscala[k];
+
+    return [];
+  }
+
+  function labelFromId(id) {
+    // Se você usa tokenIndex (Map) com meta {nome, matricula}
+    if (typeof tokenIndex !== "undefined" && tokenIndex?.get) {
+      const meta = tokenIndex.get(id);
+      if (meta?.nome && meta?.matricula) return `${meta.nome} (${meta.matricula})`;
+    }
+
+    // Fallback: se basePoliciais existe e o id contém matrícula
+    const digits = String(id).match(/\d{4,}/)?.[0];
+    if (digits && Array.isArray(basePoliciais)) {
+      const pp = basePoliciais.find(p => String(p.matricula).includes(digits));
+      if (pp) return `${pp.nome} (${pp.matricula})`;
+    }
+
+    return String(id);
+  }
+
+  function cellText(ids) {
+    if (!ids || !ids.length) return "—";
+    // 1 por linha deixa bem legível no estilo ODT
+    return ids.map(labelFromId).join("\n");
+  }
+
+  // ===== Monta cabeçalho da tabela: POSTO + faixas (colunas dinâmicas) [web:49][web:105]
+  const head = [
+    [
+      "POSTO",
+      ...Array.from({ length: nFaixas }, (_, f) => {
+        const faixa = faixasHorario[f] || { inicio: "--:--", fim: "--:--" };
+        return `${faixa.inicio} - ${faixa.fim}`;
+      })
+    ]
+  ];
+
+  // ===== Monta body: 1 linha por posto, colunas por faixa
+  const postos = Object.keys(postosConfig);
+  const body = postos.map(posto => {
+    const row = [posto];
+    for (let f = 0; f < nFaixas; f++) {
+      row.push(cellText(getIds(f, posto)));
+    }
+    return row;
+  });
+
+  // ===== Render tabela com AutoTable (moderno/limpo)
+  doc.autoTable({
+    head,
+    body,
+    startY: y + 24,
+    theme: "grid",
+    styles: {
+      font: "helvetica",
+      fontSize: 11,
+      cellPadding: 2,
+      valign: "top",
+      overflow: "linebreak",      // quebra linha em células longas [web:77]
+      cellWidth: "wrap"           // tenta “embrulhar” o conteúdo [web:77][web:108]
+    },
+    headStyles: {
+      fillColor: [102, 126, 234],
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+      halign: "center",
+      valign: "middle"
+    },
+    columnStyles: {
+      0: { cellWidth: 28, fontStyle: "bold" } // POSTO
+      // demais colunas ficam automáticas
+    },
+    alternateRowStyles: { fillColor: [245, 247, 252] },
+    margin: { left: marginX, right: marginX }
+  });
+
+  doc.save(`escala-upi4-${data}.pdf`);
+}
+
+
+
+    // ===== UI EVENTS =====
+    function updateFooterClock() {
+      const now = new Date();
+      $("#currentDate").textContent = now.toLocaleDateString("pt-BR");
+      $("#currentTime").textContent = now.toLocaleTimeString("pt-BR");
+    }
+
+    $("#csvFile").addEventListener("change", (ev) => {
+      const file = ev.target.files?.[0];
+      parseCSVFile(file);
+      ev.target.value = "";
+    });
+
+    $("#uploadArea").addEventListener("click", () => $("#csvFile").click());
+    $("#uploadArea").addEventListener("dragover", (ev) => { ev.preventDefault(); });
+    $("#uploadArea").addEventListener("drop", (ev) => {
+      ev.preventDefault();
+      const file = ev.dataTransfer.files?.[0];
+      parseCSVFile(file);
+    });
+
+    $("#btnAuto").addEventListener("click", autoOcupar);
+    $("#btnSalvar").addEventListener("click", salvar);
+    $("#btnLimpar").addEventListener("click", limpar);
+    $("#btnPdf").addEventListener("click", imprimirPDF);
+
+    function onChangeFaixasOuHorario() {
+      // muda faixas => reconstrói board e tokens
+      faixasHorario = calcularFaixas();
+      renderHorarios();
+
+      rebuildTokens();
+
+      // se já tem basePoliciais, recria estado vazio + repõe pool (não tenta “migrar” para evitar bagunça)
+      if (basePoliciais.length) {
+        resetEstadoVazio();
+        preencherPoolComTodos();
+        $("#uploadArea").style.display = "none";
+      } else {
+        resetEstadoVazio();
+        $("#uploadArea").style.display = "block";
+      }
+      renderBoard();
+    }
+
+    $("#horaInicio").addEventListener("change", onChangeFaixasOuHorario);
+    $("#horaFim").addEventListener("change", onChangeFaixasOuHorario);
+    $("#faixas").addEventListener("change", onChangeFaixasOuHorario);
+
+    // ===== INIT =====
+    $("#data").value = todayISO();
+    faixasHorario = calcularFaixas();
+    resetEstadoVazio();
+    renderHorarios();
+    renderBoard();
+
+    setInterval(updateFooterClock, 1000);
+    updateFooterClock();
+
+    carregarStorage();
+  </script>
+</body>
+</html>

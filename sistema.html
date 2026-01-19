@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="UPI-4">
+
+    <title>Sistema de Controle - UP Itaitinga 4</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at top, #dbeafe 0, #eff6ff 40%, #f9fafb 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: #0f172a;
+}
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+       .header {
+  position: relative;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  padding: 22px 26px 18px;
+  margin-bottom: 20px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.10),
+    0 0 0 1px rgba(148, 163, 184, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+.header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header-title h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.header-title p {
+  font-size: 14px;
+  color: #64748b;
+}
+
+        .header .subtitle {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .controls-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* ===== BOTÕES PILL ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #2563eb;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+  transition: 0.18s ease;
+  line-height: 1;
+}
+
+.btn-primary { background: #2563eb; } /* Gerar / Buscar */
+.btn-success { background: #16a34a; } /* Confirmar, Salvar */
+.btn-danger  { background: #ef4444; } /* Limpar, Excluir */
+.btn-neutral { background: #64748b; } /* Voltar */
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+}
+        select {
+            padding: 12px 20px;
+            font-size: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        select:hover {
+            border-color: #667eea;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .stats-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 10px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background-color: #f7fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        footer {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-content {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .footer-content strong {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+	
+	/* Estilo para alas desabilitadas */
+.distribution-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.distribution-item:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.distribution-item.disabled {
+    opacity: 0.4;
+    background: #e2e8f0 !important;
+    cursor: pointer;
+    position: relative;
+}
+
+.distribution-item.disabled::after {
+    content: '🚫';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    opacity: 0.6;
+}
+
+.distribution-item.disabled .distribution-label,
+.distribution-item.disabled .distribution-value {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+
+
+
+/* Stats avançadas */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.stat-icon {
+    font-size: 24px;
+}
+
+.stat-card-title {
+    font-size: 12px;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.stat-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+/* Badges de localização */
+.location-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.badge-bloco-01 { background: #e6f7ff; color: #0066cc; }
+.badge-ala-a { background: #fff4e6; color: #d46b08; }
+.badge-ala-b { background: #f0f5ff; color: #2f54eb; }
+.badge-ala-c { background: #f6ffed; color: #52c41a; }
+.badge-ala-d { background: #fff1f0; color: #cf1322; }
+.badge-ala-seguranca { background: #fcffe6; color: #7cb305; }
+
+/* Distribuição por localização */
+.distribution-container {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.distribution-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.distribution-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.distribution-item {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.distribution-item:hover {
+    border-color: #667eea;
+    transform: scale(1.05);
+}
+
+.distribution-label {
+    font-size: 12px;
+    color: #718096;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.distribution-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.header {
+    position: relative;
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+
+.btn-logout {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f56565;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 10;
+}
+
+.btn-logout:hover {
+    background: #e53e3e;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+}
+
+/* ============================================ */
+/* RESPONSIVIDADE */
+/* ============================================ */
+
+/* Tablets e telas médias (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .container {
+        max-width: 95%;
+    }
+
+    .header h1 {
+        font-size: 1.5em;
+    }
+
+    .modules-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .user-info {
+        text-align: center;
+    }
+}
+
+/* Tablets pequenos e celulares grandes (max-width: 768px) */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .header h1 {
+        font-size: 1.3em;
+    }
+
+    .header p {
+        font-size: 0.9em;
+    }
+
+    .btn-logout {
+        top: 10px;
+        right: 10px;
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .upload-section {
+        padding: 15px 20px;
+    }
+
+    .upload-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .table-wrapper {
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        font-size: 12px;
+        min-width: 600px;
+    }
+
+    th, td {
+        padding: 8px 10px;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .buttons-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .summary-value {
+        font-size: 1.5em;
+    }
+
+    .modules-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .module-card {
+        padding: 20px;
+    }
+
+    .module-icon {
+        font-size: 2.5em;
+    }
+
+    .module-title {
+        font-size: 1.3em;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .stat-card-value {
+        font-size: 20px;
+    }
+
+    .distribution-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+}
+
+/* Celulares pequenos (max-width: 480px) */
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.1em;
+    }
+
+    .header p {
+        font-size: 0.8em;
+    }
+
+    .btn-logout {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .login-container {
+        padding: 25px;
+    }
+
+    .login-header h1 {
+        font-size: 1.5em;
+    }
+
+    .file-input-label {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    table {
+        font-size: 10px;
+    }
+
+    th, td {
+        padding: 6px 8px;
+    }
+
+    .summary {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .summary-label {
+        font-size: 0.8em;
+    }
+
+    .summary-value {
+        font-size: 1.3em;
+    }
+
+    .module-icon {
+        font-size: 2em;
+    }
+
+    .module-title {
+        font-size: 1.1em;
+    }
+
+    .module-description {
+        font-size: 0.9em;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        width: 95%;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+}
+
+/* Modo paisagem em celulares */
+@media (max-height: 500px) and (orientation: landscape) {
+    .login-container {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .header {
+        padding: 15px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+}
+
+/* Ajustes para impressão em dispositivos móveis */
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+
+    </style>
+</head>
+<script>
+  // Registra o Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('Service Worker registrado com sucesso:', registration.scope);
+        })
+        .catch(error => {
+          console.log('Falha ao registrar Service Worker:', error);
+        });
+    });
+  }
+</script>
+
+<body>
+
+
+<div class="container">
+        <!-- Header -->
+        <div class="header">
+	    
+    		<button id="btnLogout" class="btn-logout">🚪 Sair</button>
+            <h1>Sistema de Controle de Retirada de Internos</h1>
+            <p class="subtitle">Unidade Prisional de Itaitinga 4 - Gestão de Visitas</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-panel">
+            <div class="controls-row">
+                <div class="file-input-wrapper">
+                    <input type="file" id="pdfInput" accept=".pdf,.xlsx,.xls">
+                    <label for="pdfInput" class="file-input-label">
+                        📂 Selecionar Arquivo
+                    </label>
+                </div>
+                
+                <select id="sortOption">
+                    <option value="senha">📋 Ordenar por Senha</option>
+                    <option value="custodiado">👤 Ordenar por Nome</option>
+                    <option value="localizacao">📍 Ordenar por Localização</option>
+                </select>
+
+                <button id="btnVoltar" class="btn btn-neutral">← Voltar</button>
+
+                <button id="btnPdf" onclick="printPDF()" class="btn btn-success">🖨️ Imprimir</button>
+
+                <button id="btnLimpar" onclick="clearForm()" class="btn btn-danger">🗑️ Limpar </button>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-icon">👥</span>
+            <span class="stat-card-title">Total de Internos</span>
+        </div>
+        <div class="stat-card-value" id="totalCount">0</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-icon">🏢</span>
+            <span class="stat-card-title">Blocos Ativos</span>
+        </div>
+        <div class="stat-card-value" id="blocosCount">0</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-icon">📍</span>
+            <span class="stat-card-title">Alas Distintas</span>
+        </div>
+        <div class="stat-card-value" id="alasCount">0</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-icon">🕐</span>
+            <span class="stat-card-title">Hora Atual</span>
+        </div>
+        <div class="stat-card-value" id="currentTime" style="font-size: 20px;">--:--:--</div>
+    </div>
+</div>
+
+<!-- Distribuição por Localização -->
+<div class="distribution-container" id="distributionContainer" style="display: none;">
+    <div class="distribution-title">
+        📊 Distribuição por Localização
+    </div>
+    <div class="distribution-grid" id="distributionGrid"></div>
+</div>
+
+
+        <!-- Loading -->
+        <div class="loading" id="loading">Processando arquivo...</div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Qnt</th>
+                        <th>Senha</th>
+                        <th>Custodiado</th>
+                        <th>Localização</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable">
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📄</div>
+                                <div class="empty-state-text">Nenhum arquivo carregado. Selecione um arquivo PDF ou Excel para começar.</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <!-- Footer -->
+<footer>
+    <div class="footer-content">
+        <strong>UP ITAITINGA 4</strong> - Itaitinga, <span id="currentDate"></span>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <small style="color: #718096;">
+                Sistema desenvolvido por 
+                <strong style="color: #667eea; font-weight: 600;">Zaidoh</strong>
+            </small>
+        </div>
+    </div>
+</footer>
+    </div>
+
+    <script>
+	let disabledAlas = new Set();
+        let extractedData = [];
+ 
+// ========== DEFINIR ALAS VÁLIDAS DA UPI-4 ==========
+	const ALAS_VALIDAS_UPI4 = ['A', 'B', 'C', 'D', 'E', 'F', 'SEGURANCA A', 'SEGURANÇA B', 'ENFERMARIA'];
+
+// Função auxiliar para verificar se a ala é válida
+function isAlaValida(localizacao) {
+    const match = localizacao.match(/Ala[:\s]+(.+?)\s*-\s*Cela/i);
+    if (!match) return false;
+    
+    const ala = match[1].trim().toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, ''); // Remove acentos
+    
+    return ALAS_VALIDAS_UPI4.some(validAla => {
+        const normalizedValidAla = validAla.toUpperCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+        return ala === normalizedValidAla;
+    });
+}
+
+// Verificar login
+if (!sessionStorage.getItem('usuarioLogado')) {
+    window.location.href = 'index.html';
+}
+
+// Voltar
+document.getElementById('btnVoltar').addEventListener('click', () => {
+    window.location.href = 'index.html';
+});
+
+// Logout
+document.getElementById('btnLogout').addEventListener('click', () => {
+    if (confirm('Deseja sair?')) {
+        sessionStorage.removeItem('usuarioLogado');
+        window.location.href = 'index.html';
+    }
+});
+
+        // ========== EVENT LISTENER ÚNICO ==========
+        document.getElementById('pdfInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const fileName = file.name.toLowerCase();
+            
+            if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                processExcel(file);
+            } else if (fileName.endsWith('.pdf')) {
+                processPDFFile(file);
+            } else {
+                alert('Formato não suportado. Use .xlsx ou .pdf');
+            }
+        });
+
+        document.getElementById('sortOption').addEventListener('change', function() {
+            sortAndDisplay();
+        });
+
+
+
+
+ function updateStats() {
+            // Total
+            document.getElementById('totalCount').textContent = extractedData.length;
+            
+            if (extractedData.length === 0) {
+                document.getElementById('blocosCount').textContent = '0';
+                document.getElementById('alasCount').textContent = '0';
+                document.getElementById('distributionContainer').style.display = 'none';
+                return;
+            }
+            
+            // Conta blocos únicos
+            const blocos = new Set();
+            extractedData.forEach(item => {
+                const match = item.localizacao.match(/Bloco[:\s]*(\d+)/i);
+                if (match) blocos.add(match[1]);
+            });
+            document.getElementById('blocosCount').textContent = blocos.size;
+            
+            // Conta alas únicas
+            const alas = new Set();
+            extractedData.forEach(item => {
+                const match = item.localizacao.match(/Ala[:\s]+(.+?)\s*-\s*Cela/i);
+                if (match) {
+                    alas.add(match[1].trim());
+                }
+            });
+            document.getElementById('alasCount').textContent = alas.size;
+            
+            // Atualiza distribuição
+            updateDistribution();
+        }
+function updateDistribution() {
+            if (extractedData.length === 0) {
+                document.getElementById('distributionContainer').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('distributionContainer').style.display = 'block';
+            
+            // Agrupa por ala
+            const distribution = {};
+            extractedData.forEach(item => {
+                const match = item.localizacao.match(/Ala[:\s]+(.+?)\s*-\s*Cela/i);
+                if (match) {
+                    const ala = match[1].trim();
+                    distribution[ala] = (distribution[ala] || 0) + 1;
+                }
+            });
+            
+            // Renderiza
+            const grid = document.getElementById('distributionGrid');
+            grid.innerHTML = '';
+            
+            if (Object.keys(distribution).length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #a0aec0;">Nenhuma distribuição encontrada</p>';
+                return;
+            }
+            
+            Object.entries(distribution)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([ala, count]) => {
+                    const item = document.createElement('div');
+                    item.className = 'distribution-item';
+                    
+                    // Adiciona classe 'disabled' se a ala estiver desabilitada
+                    if (disabledAlas.has(ala)) {
+                        item.classList.add('disabled');
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="distribution-label">Ala ${ala}</div>
+                        <div class="distribution-value">${count}</div>
+                    `;
+                    
+                    // Adiciona evento de clique
+                    item.addEventListener('click', function() {
+                        toggleAla(ala);
+                    });
+                    
+                    grid.appendChild(item);
+                });
+        }
+
+
+function toggleAla(ala) {
+    if (disabledAlas.has(ala)) {
+        // Se já está desabilitada, reabilita
+        disabledAlas.delete(ala);
+    } else {
+        // Se está habilitada, desabilita
+        disabledAlas.add(ala);
+    }
+    
+    // Atualiza a visualização
+    updateDistribution();
+    displayData();
+}
+
+
+function getAlaBadgeClass(localizacao) {
+    if (localizacao.includes('Ala A')) return 'badge-ala-a';
+    if (localizacao.includes('Ala B')) return 'badge-ala-b';
+    if (localizacao.includes('Ala C')) return 'badge-ala-c';
+    if (localizacao.includes('Ala D')) return 'badge-ala-d';
+    if (localizacao.includes('SEGURANÇA') || localizacao.includes('SEGURANCA')) return 'badge-ala-seguranca';
+    return 'badge-bloco-01';
+}
+
+
+        // ========== ATUALIZAR processExcel() ==========
+function processExcel(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                console.log("Total de linhas no Excel:", jsonData.length);
+                
+                extractedData = [];
+                const seen = new Set();
+                let rejeitados = 0;
+                
+                jsonData.forEach(row => {
+                    const senha = row['Senha Visita'];
+                    const custodiado = row['Nome Custodiado'];
+                    const localizacao = row['Localização ATUAL(BLOCO - ALA - CELA)'];
+                    
+                    if (custodiado && localizacao && row['Situação Visita'] !== 'Cancelada') {
+                        if (!isAlaValida(localizacao)) {
+                            console.log(`❌ Rejeitado (ala inválida): ${custodiado} - ${localizacao}`);
+                            rejeitados++;
+                            return;
+                        }
+                        
+                        const key = custodiado.toUpperCase().trim()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '');
+                        
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            extractedData.push({
+                                senha: senha || 0,
+                                custodiado: custodiado.trim(),
+                                localizacao: localizacao.trim()
+                            });
+                        }
+                    }
+                });
+                
+                console.log("Total único extraído:", extractedData.length);
+                console.log("Total rejeitado (alas inválidas):", rejeitados);
+                sortAndDisplay();
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+// ========== FUNÇÃO PARA FILTRAR POR IDADE ==========
+function applyAgeFilter(data) {
+    if (currentAgeFilter === 'all') {
+        return data;
+    }
+    
+    return data.filter(row => {
+        const idade = parseInt(row.idadeVisitante);
+        
+        if (isNaN(idade)) {
+            console.log(`⚠️ Idade inválida para ${row.custodiado}: ${row.idadeVisitante}`);
+            return false; // Remove registros sem idade válida
+        }
+        
+        if (currentAgeFilter === 'adult') {
+            return idade >= 13;
+        } else if (currentAgeFilter === 'child') {
+            return idade <= 12;
+        }
+        
+        return true;
+    });
+}
+
+
+        // ========== PROCESSAR PDF ==========
+        function processPDFFile(file) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const typedarray = new Uint8Array(this.result);
+                pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                    let textContent = "";
+                    const pages = [];
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        pages.push(pdf.getPage(i).then(page => page.getTextContent()));
+                    }
+                    Promise.all(pages).then(contents => {
+                        contents.forEach(content => {
+                            textContent += content.items.map(item => item.str).join(" ") + " ";
+                        });
+                        processPDF(textContent);
+                    });
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processPDF(text) {
+            const fixedText = text.replace(/RONALD CAMELO DOS\s+VISITA\s+COM\s+.*?13\s+SANTOS\s+MALOTE/gi, 
+                                            'RONALD CAMELO DOS SANTOS VISITA COM MALOTE');
+            
+            const cleanText = fixedText
+                .replace(/Página \d+ de \d+/g, ' ')
+                .replace(/Gerado em \d{2}\/\d{2}\/\d{4} as \d{2}:\d{2}:\d{2}/g, ' ')
+                .replace(/RELATÓRIO DE VISITAS\/ENTREGA MALOTES COM SENHAS/g, ' ')
+                .replace(/\s+/g, ' ');
+            
+            const regex = /(\d{1,3})\s+(\d{6})\s+-\s+([A-ZÀÉÍÓÚÂÊÔÃÕÇÜÑ][A-ZÀÉÍÓÚÂÊÔÃÕÇÜÑ\s]{2,80}?)\s+VISITA\s+(SEM|COM)\s+MALOTE/gi;
+            
+            let match;
+            const tempData = [];
+            const seen = new Map();
+            let matchCount = 0;
+            let rejeitados = 0;
+
+            while ((match = regex.exec(cleanText)) !== null) {
+                matchCount++;
+                const senha = parseInt(match[1]);
+                let custodiado = match[3]
+                    .trim()
+                    .replace(/\s+/g, ' ')
+                    .replace(/\s+(No|Sim|Não)$/i, '');
+                
+                const afterMatch = cleanText.substring(match.index, match.index + 800);
+                const isCancelada = /Cancelada/i.test(afterMatch.substring(0, 300));
+                if (isCancelada) {
+                    console.log("Cancelado:", custodiado);
+                    continue;
+                }
+                
+                const locRegex = /Bloco[:\s]+(\d+)\s+-\s+Ala[:\s]+([A-ZÀ-Úa-zà-ú0-9\s]+?)\s+-\s+Cela[:\s]+([A-Z0-9]+)/gi;
+                const locations = [];
+                let locMatch;
+                
+                while ((locMatch = locRegex.exec(afterMatch)) !== null) {
+                    locations.push({
+                        bloco: locMatch[1].trim(),
+                        ala: locMatch[2].trim(),
+                        cela: locMatch[3].trim()
+                    });
+                }
+                
+                let localizacao = "Não encontrada";
+                if (locations.length >= 2) {
+                    const loc = locations[1];
+                    localizacao = `Bloco ${loc.bloco} - Ala ${loc.ala} - Cela ${loc.cela}`;
+                } else if (locations.length === 1) {
+                    const loc = locations[0];
+                    localizacao = `Bloco ${loc.bloco} - Ala ${loc.ala} - Cela ${loc.cela}`;
+                }
+
+                if (!isAlaValida(localizacao)) {
+                    console.log(`❌ Rejeitado (ala inválida): ${custodiado} - ${localizacao}`);
+                    rejeitados++;
+                    continue;
+                }
+
+                const key = custodiado.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                
+                if (!seen.has(key)) {
+                    seen.set(key, true);
+                    tempData.push({ senha, custodiado, localizacao });
+                } else {
+                    console.log("Duplicado:", custodiado);
+                }
+            }
+
+            console.log("=== RESULTADO PDF ===");
+            console.log("Total de matches:", matchCount);
+            console.log("Total único extraído:", tempData.length);
+            console.log("Total rejeitado (alas inválidas):", rejeitados);
+            
+            extractedData = tempData;
+            sortAndDisplay();
+        }
+
+
+        // ========== OUTRAS FUNÇÕES ==========
+       function sortAndDisplay() {
+            const sortBy = document.getElementById("sortOption").value;
+            extractedData.sort((a, b) => {
+                if (sortBy === "senha") {
+                    return a.senha - b.senha;
+                } else if (sortBy === "custodiado") {
+                    return a.custodiado.localeCompare(b.custodiado);
+                } else if (sortBy === "localizacao") {
+                    return a.localizacao.localeCompare(b.localizacao);
+                }
+            });
+            displayData();
+        }
+
+
+      function displayData() {
+    const tableBody = document.getElementById("dataTable");
+    tableBody.innerHTML = "";
+    
+    if (extractedData.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📄</div>
+                        <div class="empty-state-text">Nenhum arquivo carregado. Selecione um arquivo PDF ou Excel para começar.</div>
+                    </div>
+                </td>
+            </tr>
+        `;
+        updateStats();
+        return;
+    }
+    
+    // Filtra os dados removendo alas desabilitadas
+    const filteredData = extractedData.filter(row => {
+        const match = row.localizacao.match(/Ala[:\s]+(.+?)\s*-\s*Cela/i);
+        if (match) {
+            const ala = match[1].trim();
+            return !disabledAlas.has(ala);
+        }
+        return true;
+    });
+    
+    if (filteredData.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🚫</div>
+                        <div class="empty-state-text">Todas as alas foram desabilitadas. Clique em uma ala para habilitá-la novamente.</div>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    filteredData.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        const badgeClass = getAlaBadgeClass(row.localizacao);
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td><strong>${row.senha}</strong></td>
+            <td>${row.custodiado}</td>
+            <td><span class="location-badge ${badgeClass}">${row.localizacao}</span></td>
+        `;
+        tableBody.appendChild(tr);
+    });
+    
+    updateStats();
+}
+    
+   
+
+
+        function clearForm() {
+    document.getElementById("pdfInput").value = "";
+    document.getElementById("dataTable").innerHTML = `
+        <tr>
+            <td colspan="4">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📄</div>
+                    <div class="empty-state-text">Nenhum arquivo carregado. Selecione um arquivo PDF ou Excel para começar.</div>
+                </div>
+            </td>
+        </tr>
+    `;
+    extractedData = [];
+    disabledAlas.clear();
+    updateStats();
+}
+        function printPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Título centralizado
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    const pageWidth = doc.internal.pageSize.width;
+    const title = "Controle de Retiradas de internos para visita social";
+    const titleWidth = doc.getTextWidth(title);
+    const titleX = (pageWidth - titleWidth) / 2;
+    doc.text(title, titleX, 10);
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+
+    // Aplica filtro de alas desabilitadas
+    const filteredData = extractedData.filter(row => {
+        const match = row.localizacao.match(/Ala[:\s]+(.+?)\s*-\s*Cela/i);
+        if (match) {
+            const ala = match[1].trim();
+            return !disabledAlas.has(ala);
+        }
+        return true;
+    });
+
+    const tableData = filteredData.map((row, index) => [
+        index + 1, 
+        row.senha, 
+        row.custodiado, 
+        row.localizacao
+    ]);
+
+    doc.autoTable({
+        head: [['Qnt','Senha', 'Custodiado', 'Localização']],
+        body: tableData,
+        startY: 20
+    });
+
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString();
+    const formattedTime = currentDate.toLocaleTimeString();
+
+    doc.setFontSize(10);
+    doc.text(`UP ITAITINGA 4 - Itaitinga, ${formattedDate} às ${formattedTime}`, pageWidth / 2, doc.lastAutoTable.finalY + 10, { align: 'center' });
+
+    
+
+    doc.save("dados_extraidos.pdf");
+}
+        function updateFooterDateTime() {
+            const currentDate = new Date();
+            const formattedDate = currentDate.toLocaleDateString();
+            const formattedTime = currentDate.toLocaleTimeString();
+
+            document.getElementById("currentDate").textContent = formattedDate;
+            document.getElementById("currentTime").textContent = formattedTime;
+        }
+
+        setInterval(updateFooterDateTime, 1000);
+        updateFooterDateTime();
+    </script>
+</body>
+</html>
